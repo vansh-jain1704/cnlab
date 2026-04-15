@@ -1,37 +1,42 @@
-set ns [new Simulator] 
-set nf [open prog1.nam w] 
-$ns namtrace-all $nf 
-set nd [open prog1.tr w] 
-$ns trace-all $nd 
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_california_housing
 
-proc finish { } { 
-global ns nf nd 
-$ns flush-trace 
-close $nf 
-close $nd 
-exec nam prog1.nam & 
-exit 0 
-} 
+data = fetch_california_housing(as_frame=True)
+housing_df = data.frame
 
-set n0 [$ns node] 
-set n1 [$ns node] 
-set n2 [$ns node] 
+numerical_features = housing_df.select_dtypes(include=[np.number]).columns
 
-$ns duplex-link $n0 $n1 1Mb 10ms DropTail 
-$ns duplex-link $n1 $n2 512kb 10ms DropTail 
-$ns queue-limit $n1 $n2 10 
+plt.figure(figsize=(15, 10))
+for i, feature in enumerate(numerical_features):
+    plt.subplot(3, 3, i + 1)
+    sns.histplot(housing_df[feature], kde=True, bins=30, color='blue')
+    plt.title(f'Distribution of {feature}')
+plt.tight_layout()
+plt.show()
 
-set udp0 [new Agent/UDP] 
-$ns attach-agent $n0 $udp0 
-set cbr0 [new Application/Traffic/CBR] 
-$cbr0 set packetSize_ 500 
-$cbr0 set interval_ 0.005 
-$cbr0 attach-agent $udp0 
-set sink [new Agent/Null] 
-$ns attach-agent $n2 $sink 
-$ns connect $udp0 $sink
+plt.figure(figsize=(15, 10))
+for i, feature in enumerate(numerical_features):
+    plt.subplot(3, 3, i + 1)
+    sns.boxplot(x=housing_df[feature], color='orange')
+    plt.title(f'Box Plot of {feature}')
+plt.tight_layout()
+plt.show()
 
-$ns at 0.2 "$cbr0 start" 
-$ns at 4.5 "$cbr0 stop" 
-$ns at 5.0 "finish" 
-$ns run
+print("Outliers Detection:")
+outliers_summary = {}
+
+for feature in numerical_features:
+    Q1 = housing_df[feature].quantile(0.25)
+    Q3 = housing_df[feature].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    outliers = housing_df[(housing_df[feature] < lower_bound) | (housing_df[feature] > upper_bound)]
+    outliers_summary[feature] = len(outliers)
+    print(f"{feature}: {len(outliers)} outliers")
+
+print("\nDataset Summary:")
+print(housing_df.describe())

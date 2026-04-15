@@ -2,11 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
 
-# Step 1: Create 100 random numbers
+
 data = np.random.rand(100)
 
-# Step 2: Label first 50 points
-# Rule: <= 0.5 → Class1, > 0.5 → Class2
+
 labels = []
 for x in data[:50]:
     if x <= 0.5:
@@ -14,50 +13,50 @@ for x in data[:50]:
     else:
         labels.append("Class2")
 
-# Step 3: Distance function
+
 def euclidean_distance(a, b):
     return abs(a - b)
 
-# Step 4: KNN function
+
 def knn_classifier(train_data, train_labels, test_point, k):
     
     distances = []
 
-    # Find distance of test point from all training points
+    
     for i in range(len(train_data)):
         dist = euclidean_distance(test_point, train_data[i])
         distances.append((dist, train_labels[i]))
 
-    # Sort based on distance
+    
     distances.sort()
 
-    # Take first k nearest points
+   
     nearest = distances[:k]
 
-    # Get their labels
+    
     nearest_labels = []
     for d, label in nearest:
         nearest_labels.append(label)
 
-    # Find most common label
+   
     final_label = Counter(nearest_labels).most_common(1)[0][0]
 
     return final_label
 
 
-# Step 5: Split data
+
 train_data = data[:50]
 test_data = data[50:]
 train_labels = labels
 
-# Different k values
+
 k_values = [1, 2, 3, 4, 5, 20, 30]
 
 print("\n--- k-NN Classification ---\n")
 
 results = {}
 
-# Step 6: Classify test data
+
 for k in k_values:
     print(f"\nResults for k = {k}:\n")
 
@@ -74,7 +73,7 @@ for k in k_values:
 
 print("\nClassification complete.\n")
 
-# Step 7: Plot results
+
 for k in k_values:
     classified = results[k]
 
@@ -89,7 +88,7 @@ for k in k_values:
 
     plt.figure(figsize=(10, 6))
 
-    # Training points
+   
     colors = []
     for label in train_labels:
         if label == "Class1":
@@ -99,7 +98,7 @@ for k in k_values:
 
     plt.scatter(train_data, [0]*len(train_data), c=colors, label="Training")
 
-    # Test points
+  
     plt.scatter(class1, [1]*len(class1), c="blue", label="Class1 Test")
     plt.scatter(class2, [1]*len(class2), c="red", label="Class2 Test")
 

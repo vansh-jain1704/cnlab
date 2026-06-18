@@ -1,0 +1,111 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import Counter
+
+
+data = np.random.rand(100)
+
+
+labels = []
+for x in data[:50]:
+    if x <= 0.5:
+        labels.append("Class1")
+    else:
+        labels.append("Class2")
+
+
+def euclidean_distance(a, b):
+    return abs(a - b)
+
+
+def knn_classifier(train_data, train_labels, test_point, k):
+    
+    distances = []
+
+    
+    for i in range(len(train_data)):
+        dist = euclidean_distance(test_point, train_data[i])
+        distances.append((dist, train_labels[i]))
+
+    
+    distances.sort()
+
+   
+    nearest = distances[:k]
+
+    
+    nearest_labels = []
+    for d, label in nearest:
+        nearest_labels.append(label)
+
+   
+    final_label = Counter(nearest_labels).most_common(1)[0][0]
+
+    return final_label
+
+
+
+train_data = data[:50]
+test_data = data[50:]
+train_labels = labels
+
+
+k_values = [1, 2, 3, 4, 5, 20, 30]
+
+print("\n--- k-NN Classification ---\n")
+
+results = {}
+
+
+for k in k_values:
+    print(f"\nResults for k = {k}:\n")
+
+    classified = []
+
+    for i in range(len(test_data)):
+        label = knn_classifier(train_data, train_labels, test_data[i], k)
+        classified.append(label)
+
+        print(f"Point x{i+51} (value: {test_data[i]:.4f}) → {label}")
+
+    results[k] = classified
+
+
+print("\nClassification complete.\n")
+
+
+for k in k_values:
+    classified = results[k]
+
+    class1 = []
+    class2 = []
+
+    for i in range(len(test_data)):
+        if classified[i] == "Class1":
+            class1.append(test_data[i])
+        else:
+            class2.append(test_data[i])
+
+    plt.figure(figsize=(10, 6))
+
+   
+    colors = []
+    for label in train_labels:
+        if label == "Class1":
+            colors.append("blue")
+        else:
+            colors.append("red")
+
+    plt.scatter(train_data, [0]*len(train_data), c=colors, label="Training")
+
+  
+    plt.scatter(class1, [1]*len(class1), c="blue", label="Class1 Test")
+    plt.scatter(class2, [1]*len(class2), c="red", label="Class2 Test")
+
+    plt.title(f"k = {k}")
+    plt.xlabel("Data")
+    plt.ylabel("Level")
+    plt.legend()
+    plt.grid()
+
+    plt.show()

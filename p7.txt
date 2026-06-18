@@ -56,4 +56,4 @@ def polynomial_regression_auto_mpg():
 if __name__ == "__main__": 
     print("Demonstrating Linear Regression and Polynomial Regression\n") 
     linear_regression_california() 
-    polynomial_regression_auto_mpg(
+    polynomial_regression_auto_mpg()
